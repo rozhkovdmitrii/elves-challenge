@@ -1,11 +1,18 @@
+/// This module is an implementation of [Advent of Code day 1](https://adventofcode.com/2023/day/1)
+///
+/// It provides the CalibrationDoc abstraction, which is designed to retrieve a calibration value
+/// from a document consisting of lines of text. Each of them initially contains a certain
+/// calibration value
+///
+/// Getting the calibration value could be performed by calling `get_line_calibration_v2` method
+///
+
 #[path = "calibration_doc/routes.rs"]
 mod routes;
 
-use routes::{Rule, BKW_ROUTES, FWD_ROUTES};
+use routes::{Check, BKW_ROUTES, FWD_ROUTES};
 
 use self::Direction::{Backward, Forward};
-
-struct CalibrationDoc<'a>(&'a str);
 
 #[derive(Clone, Copy)]
 enum Direction {
@@ -13,8 +20,14 @@ enum Direction {
     Backward,
 }
 
+pub struct CalibrationDoc<'a>(&'a str);
+
 impl CalibrationDoc<'_> {
-    fn get_calibration_v1(&self) -> u32 {
+    pub fn new(input: &str) -> CalibrationDoc {
+        CalibrationDoc(input)
+    }
+
+    pub fn get_calibration_v1(&self) -> u32 {
         self.0.lines().map(Self::get_line_calibration_v1).sum()
     }
 
@@ -27,7 +40,7 @@ impl CalibrationDoc<'_> {
         two_digit_num.parse().unwrap_or_default()
     }
 
-    fn get_calibration_v2(&self) -> u32 {
+    pub fn get_calibration_v2(&self) -> u32 {
         self.0.lines().map(Self::line_calibration_v2).sum()
     }
 
@@ -76,7 +89,7 @@ impl CalibrationDoc<'_> {
         input: &str,
         current: char,
         depth: usize,
-        rules: &[Rule],
+        route: &[Check],
         direction: Direction,
     ) -> Option<u32> {
         if input.is_empty() {
@@ -97,13 +110,13 @@ impl CalibrationDoc<'_> {
             return None;
         }
 
-        let Some(rule) = rules.first() else {
+        let Some(check) = route.first() else {
             return None;
         };
 
-        match rule.1 {
+        match check.1 {
             val if val.is_ascii_digit() => val.to_digit(10),
-            _ => Self::look_for_digit_impl(next_input, rule.1, depth + 1, &rules[1..], direction),
+            _ => Self::look_for_digit_impl(next_input, check.1, depth + 1, &route[1..], direction),
         }
     }
 }
@@ -236,12 +249,12 @@ fn test_line_calibration() {
 #[test]
 fn test_doc_calibration() {
     let input = "3a;sdklfjlaskdj f1";
-    assert_eq!(CalibrationDoc(input).get_calibration_v2(), 31);
+    assert_eq!(CalibrationDoc::new(input).get_calibration_v2(), 31);
     let input = r#"1abc2
                    pqr3stu8vwx
                    a1b2c3d4e5f
                    treb7uchet"#;
-    assert_eq!(CalibrationDoc(input).get_calibration_v2(), 142);
+    assert_eq!(CalibrationDoc::new(input).get_calibration_v2(), 142);
 
     let input = r#"two1nine
                    eightwothree
@@ -250,19 +263,19 @@ fn test_doc_calibration() {
                    4nineeightseven2
                    zoneight234
                    7pqrstsixteen"#;
-    assert_eq!(CalibrationDoc(input).get_calibration_v2(), 281);
+    assert_eq!(CalibrationDoc::new(input).get_calibration_v2(), 281);
 
     let input = include_str!("test_data/calibration_doc_1");
-    assert_eq!(CalibrationDoc(input).get_calibration_v2(), 572);
+    assert_eq!(CalibrationDoc::new(input).get_calibration_v2(), 572);
     let input = include_str!("test_data/calibration_doc_2");
-    assert_eq!(CalibrationDoc(input).get_calibration_v2(), 911);
+    assert_eq!(CalibrationDoc::new(input).get_calibration_v2(), 911);
 
     let input = include_str!("test_data/calibration_doc_github");
-    assert_eq!(CalibrationDoc(input).get_calibration_v1(), 55208);
+    assert_eq!(CalibrationDoc::new(input).get_calibration_v1(), 55208);
     let input = include_str!("test_data/calibration_doc_github");
-    assert_eq!(CalibrationDoc(input).get_calibration_v2(), 54578);
+    assert_eq!(CalibrationDoc::new(input).get_calibration_v2(), 54578);
     let input = include_str!("test_data/calibration_doc_huge");
-    assert_eq!(CalibrationDoc(input).get_calibration_v1(), 54605);
+    assert_eq!(CalibrationDoc::new(input).get_calibration_v1(), 54605);
     let input = include_str!("test_data/calibration_doc_huge");
-    assert_eq!(CalibrationDoc(input).get_calibration_v2(), 55429);
+    assert_eq!(CalibrationDoc::new(input).get_calibration_v2(), 55429);
 }

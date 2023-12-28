@@ -1,7 +1,7 @@
 use once_cell::sync::Lazy;
 
-pub(super) type Rule = ((char, char), char);
-pub(super) type Route = Vec<Rule>;
+pub(super) type Check = ((char, char), char);
+pub(super) type Route = Vec<Check>;
 
 fn build_route(digit_alias: &str, goal: char) -> Route {
     let prev = '_';
@@ -55,8 +55,8 @@ pub(super) static BKW_ROUTES: Lazy<Vec<Route>> = Lazy::new(|| {
 
 #[test]
 fn test_route() {
-    const R1_0: Rule = (('_', 'o'), 'n');
-    const R1_1: Rule = (('o', 'n'), 'e');
-    const R1_2: Rule = (('n', 'e'), '1');
+    const R1_0: Check = (('_', 'o'), 'n');
+    const R1_1: Check = (('o', 'n'), 'e');
+    const R1_2: Check = (('n', 'e'), '1');
     assert_eq!(build_route("one", '1'), [R1_0, R1_1, R1_2])
 }
