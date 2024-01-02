@@ -7,10 +7,10 @@
 /// Getting the calibration value could be performed by calling `get_line_calibration_v2` method
 ///
 
-#[path = "calibration_doc/routes.rs"]
-mod routes;
+#[path = "calibration_doc/pattern.rs"]
+mod pattern;
 
-use routes::{Check, BKW_ROUTES, FWD_ROUTES};
+use pattern::{Pattern, BKW_PATTERNS, FWD_PATTERNS};
 
 use self::Direction::{Backward, Forward};
 
@@ -40,11 +40,11 @@ impl CalibrationDoc<'_> {
         two_digit_num.parse().unwrap_or_default()
     }
 
-    pub fn get_calibration_v2(&self) -> u32 {
+    pub fn get_calibration_v2(&self) -> u64 {
         self.0.lines().map(Self::line_calibration_v2).sum()
     }
 
-    fn line_calibration_v2(single_line: &str) -> u32 {
+    fn line_calibration_v2(single_line: &str) -> u64 {
         // The most performant solution is to make an automate that parses an input char by char
         // and gives birth for a resulting number
         let mut result = Self::look_forward(single_line);
@@ -52,71 +52,56 @@ impl CalibrationDoc<'_> {
         result
     }
 
-    fn look_forward(value: &str) -> u32 {
-        Self::look_for_digit(value, Forward).unwrap_or_default()
+    fn look_forward(value: &str) -> u64 {
+        Self::look_for_digit(value, Forward)
     }
 
-    fn look_backward(value: &str) -> u32 {
-        Self::look_for_digit(value, Backward).unwrap_or_default()
+    fn look_backward(value: &str) -> u64 {
+        Self::look_for_digit(value, Backward)
     }
 
-    fn look_for_digit(input: &str, direction: Direction) -> Option<u32> {
+    fn look_for_digit(input: &str, direction: Direction) -> u64 {
         let mut input = input;
-        let routes = match direction {
-            Forward => &FWD_ROUTES,
-            Backward => &BKW_ROUTES,
+        let pattern = match direction {
+            Forward => &FWD_PATTERNS,
+            Backward => &BKW_PATTERNS,
         };
 
         while !input.is_empty() {
-            for route in routes.iter() {
-                let current = route[0].0 .1;
-                let current_input = input;
-                if let Some(value) =
-                    Self::look_for_digit_impl(current_input, current, 0, &route, direction)
-                {
-                    return Some(value);
-                };
+            if let Some(result) = Self::look_for_digit_impl(input, pattern, direction) {
+                return result;
             }
+
             input = match direction {
                 Forward => &input[1..],
                 Backward => &input[..input.len() - 1],
             };
         }
-        None
+        0
     }
 
-    fn look_for_digit_impl(
-        input: &str,
-        current: char,
-        depth: usize,
-        route: &[Check],
-        direction: Direction,
-    ) -> Option<u32> {
+    fn look_for_digit_impl(input: &str, pattern: &Pattern, direction: Direction) -> Option<u64> {
+        if let Pattern::Result(result) = pattern {
+            return Some(*result);
+        }
+
         if input.is_empty() {
             return None;
         }
-        let (to_be_checked, next_input) = match direction {
-            Forward => (input.chars().nth(0), &input[1..]),
-            Backward => (input.chars().last(), &input[0..input.len() - 1]),
-        };
 
-        let to_be_checked =
-            to_be_checked.expect("Expected to_be_checked to be set from non empty input");
-        if let result @ Some(_) = to_be_checked.to_digit(10) {
-            return result;
-        };
-
-        if to_be_checked != current {
-            return None;
-        }
-
-        let Some(check) = route.first() else {
-            return None;
-        };
-
-        match check.1 {
-            val if val.is_ascii_digit() => val.to_digit(10),
-            _ => Self::look_for_digit_impl(next_input, check.1, depth + 1, &route[1..], direction),
+        match pattern {
+            Pattern::Result(value) => Some(*value),
+            Pattern::Check(rules) => {
+                let (char, next_input) = match direction {
+                    Forward => (input.chars().nth(0), &input[1..]),
+                    Backward => (input.chars().last(), &input[0..input.len() - 1]),
+                };
+                let Some(ref mut pattern) = rules.get(&char.expect("Next char expected to exist"))
+                else {
+                    return None;
+                };
+                Self::look_for_digit_impl(next_input, pattern, direction)
+            }
         }
     }
 }
@@ -132,6 +117,7 @@ fn test_look_for_digit() {
     assert_eq!(CalibrationDoc::look_forward("seven"), 7);
     assert_eq!(CalibrationDoc::look_forward("eight"), 8);
     assert_eq!(CalibrationDoc::look_forward("nine"), 9);
+    assert_eq!(CalibrationDoc::look_forward("0"), 0);
     assert_eq!(CalibrationDoc::look_forward("1"), 1);
     assert_eq!(CalibrationDoc::look_forward("2"), 2);
     assert_eq!(CalibrationDoc::look_forward("3"), 3);
@@ -151,6 +137,8 @@ fn test_look_for_digit() {
     assert_eq!(CalibrationDoc::look_backward("seven"), 7);
     assert_eq!(CalibrationDoc::look_backward("eight"), 8);
     assert_eq!(CalibrationDoc::look_backward("nine"), 9);
+
+    assert_eq!(CalibrationDoc::look_backward("0"), 0);
     assert_eq!(CalibrationDoc::look_backward("1"), 1);
     assert_eq!(CalibrationDoc::look_backward("2"), 2);
     assert_eq!(CalibrationDoc::look_backward("3"), 3);
@@ -183,8 +171,8 @@ fn test_line_calibration() {
     assert_eq!(CalibrationDoc::line_calibration_v2("a"), 0);
     assert_eq!(CalibrationDoc::line_calibration_v2("1"), 11);
     assert_eq!(CalibrationDoc::line_calibration_v2("9"), 99);
-    assert_eq!(CalibrationDoc::line_calibration_v2("10"), 10);
     assert_eq!(CalibrationDoc::line_calibration_v2("01"), 1);
+    assert_eq!(CalibrationDoc::line_calibration_v2("10"), 10);
     assert_eq!(CalibrationDoc::line_calibration_v2("abcdefghij"), 0);
     assert_eq!(CalibrationDoc::line_calibration_v2("1abcdefghij"), 11);
     assert_eq!(CalibrationDoc::line_calibration_v2("abcdefghij1"), 11);
