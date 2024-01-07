@@ -7,3 +7,7 @@ Getting the calibration value could be performed by calling `get_line_calibratio
 ## Further improvements
 
 The next improvement is to implement pattern construction at compile time
+
+> currently implemented in the 
+> [generated_parser branch](https://github.com/rozhkovdmitrii/elves-challenge/tree/generated_parser)
+> but not merged into the main
