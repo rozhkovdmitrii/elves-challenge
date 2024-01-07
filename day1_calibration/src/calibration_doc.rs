@@ -194,7 +194,15 @@ fn test_line_calibration() {
 }
 
 #[test]
-fn test_doc_calibration() {
+fn test_doc_calibration_v1() {
+    let input = include_str!("test_data/calibration_doc_github");
+    assert_eq!(CalibrationDoc::new(input).get_calibration_v1(), 55208);
+    let input = include_str!("test_data/calibration_doc_huge");
+    assert_eq!(CalibrationDoc::new(input).get_calibration_v1(), 54605);
+}
+
+#[test]
+fn test_doc_calibration_v2() {
     let input = "3a;sdklfjlaskdj f1";
     assert_eq!(CalibrationDoc::new(input).get_calibration_v2(), 31);
     let input = r#"1abc2
@@ -217,12 +225,8 @@ fn test_doc_calibration() {
     let input = include_str!("test_data/calibration_doc_2");
     assert_eq!(CalibrationDoc::new(input).get_calibration_v2(), 911);
 
-    // let input = include_str!("test_data/calibration_doc_github");
-    // assert_eq!(CalibrationDoc::new(input).get_calibration_v1(), 55208);
     let input = include_str!("test_data/calibration_doc_github");
     assert_eq!(CalibrationDoc::new(input).get_calibration_v2(), 54578);
-    // let input = include_str!("test_data/calibration_doc_huge");
-    // assert_eq!(CalibrationDoc::new(input).get_calibration_v1(), 54605);
     let input = include_str!("test_data/calibration_doc_huge");
     assert_eq!(CalibrationDoc::new(input).get_calibration_v2(), 55429);
 }
