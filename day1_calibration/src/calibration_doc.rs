@@ -7,10 +7,10 @@
 /// Getting the calibration value could be performed by calling `get_line_calibration_v2` method
 ///
 
-#[path = "calibration_doc/pattern.rs"]
-mod pattern;
+#[path = "calibration_doc/digit_parser.rs"]
+mod digit_parser;
 
-use crate::calibration_doc::pattern::{look_for_digit_backward, look_for_digit_forward};
+use digit_parser::{look_for_digit_backward, look_for_digit_forward};
 
 pub struct CalibrationDoc<'a>(&'a str);
 
