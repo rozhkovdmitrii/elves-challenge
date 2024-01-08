@@ -22,10 +22,10 @@ impl Pattern {
         match pattern {
             Pattern::Result(_) => panic!("Unexpected case while constructing new pattern route"),
             Pattern::Check(ref mut rules) => {
-                let mut pattern = rules
+                let pattern = rules
                     .entry(first)
                     .or_insert_with(|| Pattern::Check([].into()));
-                Self::extend_pattern(&digit[1..], value, &mut pattern);
+                Self::extend_pattern(&digit[1..], value, pattern);
             }
         };
     }
