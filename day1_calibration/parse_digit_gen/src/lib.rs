@@ -8,28 +8,6 @@ extern crate syn;
 use pattern::Pattern;
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::spanned::Spanned;
-
-fn gen_impl(pattern: Pattern) -> proc_macro2::TokenStream {
-    match pattern {
-        Pattern::Check(to_be_matched) => {
-            let key = to_be_matched
-                .keys()
-                .map(|key| syn::LitChar::new(*key, key.span()));
-            let value = to_be_matched.values().map(|pattern| match pattern {
-                Pattern::Result(value) => quote!( Some(#value) ),
-                pattern => gen_impl(pattern.clone()),
-            });
-            quote!(
-                match input.next()? {
-                    #(#key => #value),*,
-                    _ => None
-                }
-            )
-        }
-        Pattern::Result(target) => quote!( #target, ),
-    }
-}
 
 #[proc_macro]
 pub fn gen_digit_parser(item: TokenStream) -> TokenStream {
@@ -43,11 +21,9 @@ pub fn gen_digit_parser(item: TokenStream) -> TokenStream {
     .expect("Expected parse fn name to be parsed well");
 
     let pattern = Pattern::build_from_token_stream(tokens);
-    let fwd_match_code = gen_impl(pattern);
-
     quote!(
         pub fn #parse_fn_name<T> (mut input: T) -> Option<u64> where T: Iterator<Item=char> {
-            #fwd_match_code
+            #pattern
         }
     )
     .into()

@@ -1,6 +1,8 @@
 use proc_macro::TokenTree;
+use proc_macro2::TokenStream;
+use quote::{quote, ToTokens, TokenStreamExt};
 use std::collections::BTreeMap;
-use syn::{LitInt, LitStr};
+use syn::{spanned::Spanned, LitInt, LitStr};
 
 #[derive(Clone, Debug)]
 pub enum Pattern {
@@ -78,5 +80,26 @@ impl Pattern {
 impl Default for Pattern {
     fn default() -> Self {
         Pattern::Check(BTreeMap::default())
+    }
+}
+
+impl ToTokens for Pattern {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let to_append = match self {
+            Pattern::Check(to_be_matched) => {
+                let key = to_be_matched
+                    .keys()
+                    .map(|key| syn::LitChar::new(*key, key.span()));
+                let value = to_be_matched.values();
+                quote!(
+                    match input.next()? {
+                        #(#key => #value),*,
+                        _ => None
+                    }
+                )
+            }
+            Pattern::Result(target) => quote!( Some(#target) ),
+        };
+        tokens.append_all(to_append)
     }
 }
