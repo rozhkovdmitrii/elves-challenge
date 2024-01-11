@@ -6,4 +6,4 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-parse-digit-gen = { path = "parse_digit_gen" }
+gen-parser-macros = { path = "gen_parser_macros" }

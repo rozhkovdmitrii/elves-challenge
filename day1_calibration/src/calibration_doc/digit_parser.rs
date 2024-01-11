@@ -1,4 +1,4 @@
-use parse_digit_gen::gen_digit_parser;
+use gen_parser_macros::gen_digit_parser;
 
 gen_digit_parser! {
     look_for_digit_forward,
