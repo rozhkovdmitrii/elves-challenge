@@ -6,11 +6,11 @@ version = 3
 name = "elves-challenge"
 version = "0.1.0"
 dependencies = [
- "parse-digit-gen",
+ "gen-parser-macros",
 ]
 
 [[package]]
-name = "parse-digit-gen"
+name = "gen-parser-macros"
 version = "0.1.0"
 dependencies = [
  "proc-macro2",
