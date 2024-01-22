@@ -6,11 +6,13 @@
 ///
 /// Getting the calibration value could be performed by calling `get_line_calibration_v2` method
 ///
+extern crate test;
 
 #[path = "calibration_doc/digit_parser.rs"]
 mod digit_parser;
 
 use digit_parser::{look_for_digit_backward, look_for_digit_forward};
+use test::Bencher;
 
 pub struct CalibrationDoc<'a>(&'a str);
 
@@ -63,6 +65,18 @@ impl CalibrationDoc<'_> {
         }
         0
     }
+}
+
+#[bench]
+fn measure_calibration_doc_v2(b: &mut Bencher) {
+    let input = include_str!("test_data/calibration_doc_github");
+    let doc = CalibrationDoc::new(input);
+    b.iter(|| doc.get_calibration_v2());
+}
+
+#[bench]
+fn measure_parse_line(b: &mut Bencher) {
+    b.iter(|| CalibrationDoc::line_calibration_v2("rkxbqnine7onevvqgzcvvjthreendkddfournine"));
 }
 
 #[test]

@@ -6,9 +6,28 @@ Getting the calibration value could be performed by calling `get_line_calibratio
 
 ## Specific features of realization
 
+### Benchmarks
+
 Current implementation uses a generated parser that operates on the input string due to be calibrated.
-This one surprisingly shown more than 5-8 times acceleration in comparison of using dynamic pattern matching trees that
-has been used in the previous version 
+This one surprisingly shown more than 13 times acceleration in comparison of using dynamic pattern matching trees that
+has been used in the previous version
+
+#### Generated parser 
+
+```sh
+/usr/bin/cargo bench --color=always --lib calibration_doc::measure_parse_line ...
+Testing started at 22:49 ...
+24 ns/iter (+/- 0)
+```
+
+#### In memory pattern trees
+
+```sh
+/usr/bin/cargo bench --color=always --lib calibration_doc::measure_parse_line ...
+Testing started at 22:45 ...
+314 ns/iter (+/- 15)
+```
+
 
 ### Example of generated parser
 
